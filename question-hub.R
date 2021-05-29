@@ -3,25 +3,32 @@
 # Date:           4/11/2021
 
 library(plumber)
+library(jsonlite) #TODO: do we need this here? 5/13/21
+
+
 source("SetTheory/set-relation.R")
-#this file acts as a routing hub to fetch questions for use in the ISPeL system.
 
 
+
+#This file describes the generation of multiple choice questions
+# on the topic of Sets.
+
+#TODO: remove this? 5/13/21
+options_plumber(
+  port = 3157
+)
 
 
 #The following is pretty unsafe and is only planned to be used during early development. 
 #It allows for Cross Origin Resource Sharing from any client. 
-# TODO: I'm not going to worry about this for the time being as the API is only available on
-# the server. The port is not exposed to the network, so it shouldn't be an issue. 
 #* @filter cors
 cors <- function(res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
   plumber::forward()
 }
 
-
 #* @post /getSetUnion
-getSetUnionQ <- function(qType = 1, qDifficulty = 1, dataType = 1 ){
+getSetUnionQ <- function(qType = 1, qDifficulty = 1 ){
   qTopic <- "setUnion"
   qFormat <- "1"
   output <- "If you're seeing this, Question Generation isn't working properly."
@@ -30,7 +37,7 @@ getSetUnionQ <- function(qType = 1, qDifficulty = 1, dataType = 1 ){
   
   
   if(qType == 1){
-    question <- getSetUnionMC(dType = dataType)
+    question <- getSetUnionMC()
     output <- list(topic = qTopic, type = qType, format = qFormat, difficulty = qDifficulty, question = question)
   }
   
@@ -39,7 +46,7 @@ getSetUnionQ <- function(qType = 1, qDifficulty = 1, dataType = 1 ){
 
 
 #* @post /getSetIntersect
-getSetIntersect <- function(qType = 1, qDifficulty = 1, dataType = 1) {
+getSetIntersect <- function(qType = 1, qDifficulty = 1) {
   qTopic <- "setIntersect"
   qFormat <- "1"
   output <- "If you're seeing this message, question generation isn't working properly."
@@ -48,7 +55,7 @@ getSetIntersect <- function(qType = 1, qDifficulty = 1, dataType = 1) {
   question <- list()
   
   if(qType == 1){
-    question <- getSetIntersectMC(dType = dataType)
+    question <- getSetIntersectMC()
     
     output <- list(topic = qTopic, type = qType, format = qFormat, difficulty = qDifficulty, question = question)
   }
@@ -68,5 +75,40 @@ getAsymDiff <- function(qType = 1, qDifficulty = 1) {
   }
   
   return (output)
+}
+
+getSetComplement <- function(qType = 1, qDifficulty = 1) {
+  qTopic <- "SetComplement"
+  qFormat <- "1"
+  #Error Message
+  output <- "If you're seeing this message, question generation isn't working properly."
+  
+  question <- list()
+  
+  #checks for question type, calls function, and formats output
+  if (qType == 1) {
+    question <- getSetComplementMC()
+    output <- list(topic = qTopic, type = qType, format = qFormat, difficulty = qDifficulty, question = question)
+  }
+  
+  return(output)
+}
+
+getSetEquality <- function(qType = 1, qDifficulty = 1) {
+  qTopic <- "SetEquality"
+  qFOrmat <- "1"
+  #Error Message
+  output <- "If you're seeing this message, question generation isn't working properly."
+  
+  question <- list()
+  
+  #checks for question type, calls function, and formats output
+  if (qType == 1) {
+    question <- getSetEqualityMC()
+    output <- list(topic = qTopic, type = qType, format = qFormat, difficulty = qDifficulty, question = question)
+    
+  }
+  
+  return(output)
 }
 
