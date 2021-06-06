@@ -332,3 +332,88 @@ getSetCompliment <- function(n=1, m = 5) {
   }
   
 }
+
+#* @param  n        The number of sets to consider
+#* @param  m        The number of elements in each set. 
+#* @response json   A json object containing the
+#                   sets, correct, and incorrect
+#   
+
+getCartesianProduct() <- function(n = 2, m = 3) {
+  
+  
+  
+  #creates an empty list of wrong answers
+  #index of wrong answer list
+  wrongs <- list() 
+  iWrongs <- 1     
+  
+  
+  #creating an empty list to store original. Elements will be sets.
+  sourceSets <- list()   
+  
+  
+  #creating an empty list to store set with cartesian product. Elements will be sets 
+  sets <- list()    
+  
+  
+  #for each in a given number of sets, fill the set with ints (1:9). This will generate random set length. 
+  for(e in (1:n)) {
+    sourceSets[[e]] <- sample(1:9, sample(1:m, 1, replace = F), replace = F)
+  }
+  
+  #find the length and product of two sets (will need to figure out way to generate automatically given a different n)
+  setOneLength = length(sourceSets[[1]])
+  setTwoLength = length(sourceSets[[2]])
+  correctCartesianProduct = setOneLength * setTwoLength 
+  
+  
+  #creates a list to store pairs of cartesian product. 
+  cartesianSet <- list()
+  
+  
+  #creates data frame using two sets, which inherently gets cartesian product. 
+  cartesianSet.df <- merge(sourceSets[[1]], sourceSets[[2]])
+  
+  
+  
+  
+  #converts df to a numeric vector also populates a 'cartesianSet' with numeric pairs. 
+  for(e in (1:correctCartesianProduct)) {
+    cartesianSet[[e]] <- as.numeric(cartesianSet.df[e, ])
+  }
+  
+  
+  #names the cartesian product vector to answer.
+  answer <- formatListAsSet(cartesianSet)
+  
+  
+  #generates 3 wrong answers. 1 with wrong format, 1 wrong numbers, and 1 wrong format and numbers.
+  #will need to generate questions in random order each time they move onto next question.
+  #not finished yet
+  for(e in (iWrongs:3)) {
+    wrongFormNum <- (sample(1:20, sample(1:10, 1, replace = F), replace = F))
+    wrongs[[iWrongs]] <- formatListAsSet(wrongFormNum)
+    iWrongs <- iWrongs + 1
+  }
+  
+  
+  #avilk: sets modified in order to have them displayed with the text.
+  sets <- insertSetQStrings(sourceSets) 
+  
+  qstn<-('Let A and B be two sets. What is \\$A\\times B\\$?')
+  
+  
+  #avilk: the question was moved to the end of the list 
+  sets <- c( qstn, sets)
+  
+  #format answers and sources into json and return results 
+  toSend <- list(content= sets, correct= answer, distractors= wrongs)
+  
+  #jsonToSend <- toJSON(toSend)
+  
+  return(toSend)
+  
+  
+}
+
