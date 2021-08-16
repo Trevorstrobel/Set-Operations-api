@@ -178,8 +178,9 @@ getSetUnionMC <- function(numSets=2, setSize=5, dType = 1, difficulty = 1) {
 #                     sets, correct, and incorrect
 #                     answers.
 
-getSetIntersectMC <- function(numSets=2, setSize=5, dType = 1, difficulty =1 ) {
+getSetIntersectMC <- function(numSets=2, setSize=9, dType = 1, difficulty =1 ) {
   
+  if (difficulty == 1) {
   #define the text of the question
   questionText <-('Let A and B be two sets. What is \\$A\\cap B\\$?')
   
@@ -188,61 +189,93 @@ getSetIntersectMC <- function(numSets=2, setSize=5, dType = 1, difficulty =1 ) {
   
   #creating the correct answer
   correct <- intersect(sourceSets[[1]], sourceSets[[2]])
-  if(difficulty > 1){
-    correct <- sample(correct, length(correct), replace = FALSE)
-  }
   if(length(correct) > 0){
-    correct <- formatListAsSet(correct) #format for output
+    correct <- correct #format for output
   } else {
     correct <- "\\$\\emptyset\\$"
   }
-   
+  }
+  
+  if (difficulty > 1) {
+    chance <- sample(1:2, 1, replace = FALSE)
+    #define the text of the question
+    probability <- sample(1:2, 1, replace = FALSE)
+    sourceSets <- vector(mode = "list", length = 3)
+    Firstsource <- vector(mode = "list", length = 2)
+    Secondsource <- vector(mode = "list", length = 2)
+    Thirdsource <- vector(mode = "list", length = 2)
+    Firstsource <- getSetNotations(leftIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), rightIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), leftBorder = sample(1:4, 1, replace = FALSE), 
+                                   rightBorder = sample(6:8, 1, replace = FALSE), membersType = 1, notation = sample(2:3, 1, replace = FALSE), format = TRUE) 
+    Secondsource <- getSetNotations(leftIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), rightIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), leftBorder = sample(1:4, 1, replace = FALSE), 
+                                    rightBorder = sample(6:8, 1, replace = FALSE), membersType = 1, notation = sample(2:3, 1, replace = FALSE), format = TRUE)
+    Thirdsource <- getSetNotations(leftIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), rightIncl = sample(c(TRUE, FALSE), 1, replace = FALSE), leftBorder = sample(1:4, 1, replace = FALSE), 
+                                   rightBorder = sample(6:8, 1, replace = FALSE), membersType = 1, notation = sample(2:3, 1, replace = FALSE), format = TRUE)
+    if (difficulty == 2) {
+      sourceSets[[1]] <- Firstsource[[1]]
+      sourceSets[[2]] <- Secondsource[[1]]
+      sourceSets[[3]] <- Thirdsource[[1]]
+    }
+    else {
+      sourceSets[[1]] <- Firstsource[[2]]
+      sourceSets[[2]] <- Secondsource[[2]]
+      sourceSets[[3]] <- Thirdsource[[2]]
+    }
+    
+    if (chance == 1) {
+      #define the text of the question
+      questionText <-('Let A, B, and C be three sets. What is A ∩ (B ∩ C)?')
+      first <- intersect(Secondsource[[1]], Thirdsource[[1]])
+      correct <- intersect(first, Firstsource[[1]])
+      correct <- sample(correct, length(correct), replace = FALSE)
+    }
+    if (chance == 2) {
+      #define the text of the question
+      questionText <-('Let A, B, and C be three sets. What is (A ∩ B) ∩ C?')
+      first <- intersect(Firstsource[[1]], Secondsource[[1]])
+      correct <- intersect(first, Thirdsource[[1]])
+      correct <- sample(correct, length(correct), replace = FALSE)
+    }
+    
+  }
+  
   #Create the distractors
   distractors <- vector(mode="list", length = 3)
   
   #add distractors to the list. 
-  for(i in (1:3)){
-    currentDist <- correct
-    if(difficulty > 1){ #difficulty higher than 1 scrambles lists in output.
-      currentDist <- sample(correct, replace = FALSE)
-    }
-
-    if(i == 1){ #alter answer by removing an element
-      if(currentDist == "\\$\\emptyset\\$"){
-        currentDist <- not(sourceSets[[1]], sourceSets[[2]])
-        currentDist <- formatListAsSet(currentDist[[1]])  #The [[1]] is important here as it removes a layer of abstraction imposed by R
-        
-      } else {
-        currentDist <- "\\$\\emptyset\\$"
-      }
-    }
-    else if(i ==2){ 
-      currentDist <- list(not(sourceSets[[1]], sourceSets[[2]]))
-      currentDist <- formatListAsSet(currentDist[[1]])  #The [[1]] is important here as it removes a layer of abstraction imposed by R
-      
-    }
-    else if(i == 3){ #remove another element
-      currentDist <- list(union(sourceSets[[1]], sourceSets[[2]]))
-      currentDist <- formatListAsSet(currentDist[[1]])  #The [[1]] is important here as it removes a layer of abstraction imposed by R
-    }
-    
-    
-    
+  for (i in (1:3)) {
+    currentDist <- list()
+    currentDist[[1]] <- correct
+    wrong <- currentDist[[1]]
+    wrong <- replace(wrong, length(wrong), getValue(x = dType, min = 1, max = 30, cat = 6))
+    currentDist[[1]] <- wrong
+    currentDist <- formatListAsSet(currentDist[[1]])
+    distractors[i] <- currentDist
+  
     #Note the single brackets '[1]' here 
     distractors[i] <- currentDist
   }
-  
+  correct <- formatListAsSet(correct)
+  if (difficulty < 3) {
   #Iterate through the sourceSets. format list as Set and insert at the index.
   counter <- 1
   for (s in sourceSets){
     sourceSets[counter] <- formatListAsSet(s)
     counter <- counter + 1
   }
-  
+  }
+  if (difficulty == 1) {
   #format the the sourceSets as Question Strings
   # "A = {...}"
   # "B = {...}"
   sourceSets <- insertSetQStrings(sourceSets)
+  }
+  if (difficulty > 1) {
+    #format the the sourceSets as Question Strings
+    # "A = {...}"
+    # "B = {...}"
+    # "B = {...}"
+    sourceSets <- insertSet3Strings(sourceSets)
+  }
   
   # now we concatenate the question contents together
   questionContents <- c(questionText, sourceSets)
@@ -347,27 +380,14 @@ getAsymDiffMC <- function(numSets=2, setSize=5, dType = 1, difficulty = 1) {
   distractors <- vector(mode="list", length = 3)
   
   #add distractors to the list. 
-  for(i in (1:3)){
-    # generate a set
-    currentDist <- correct
-    
-    if(i == 1){ #alter answer by removing an element
-      currentDist <- list(currentDist[-(setSize-1)])
-    }
-    else if(i ==2){ #add an element to the correct answer
-      # the issue here is that the "incorrect" element needs to be believable and 
-      # also not possible to be in the source sets. 
-      currentDist <- list(c(currentDist, getValue(x=dType)))
-    }
-    else if(i == 3){ #remove another element
-      currentDist <- list(currentDist[-(setSize-2)])
-    }
-    
-    
-    currentDist <- formatListAsSet(currentDist[[1]])  #The [[1]] is important here as it removes a layer of abstraction imposed by R
-    
-    #Note the single brackets '[1]' here 
-    distractors[i] <- currentDist
+  for (i in (1:3)) {
+      currentDist <- list()
+      currentDist[[1]] <- correct
+      wrong <- currentDist[[1]]
+      wrong <- replace(wrong, length(wrong) - sample(0:1, 1, replace = FALSE), getValue(x = dType, min = 1, max = 30, cat = 6))
+      currentDist[[1]] <- wrong
+      currentDist <- formatListAsSet(currentDist[[1]])
+      distractors[i] <- currentDist
   }
   correct <- formatListAsSet(correct)
   if (difficulty < 3) {
