@@ -181,19 +181,19 @@ getSetUnionMC <- function(numSets=2, setSize=5, dType = 1, difficulty = 1) {
 getSetIntersectMC <- function(numSets=2, setSize=9, dType = 1, difficulty =1 ) {
   
   if (difficulty == 1) {
-  #define the text of the question
-  questionText <-('Let A and B be two sets. What is \\$A\\cap B\\$?')
-  
-  #generate and fill sets
-  sourceSets <- getSets(n = numSets, m = setSize, x = dType)
-  
-  #creating the correct answer
-  correct <- intersect(sourceSets[[1]], sourceSets[[2]])
-  if(length(correct) > 0){
-    correct <- correct #format for output
-  } else {
-    correct <- "\\$\\emptyset\\$"
-  }
+    #define the text of the question
+    questionText <-('Let A and B be two sets. What is \\$A\\cap B\\$?')
+    
+    #generate and fill sets
+    sourceSets <- getSets(n = numSets, m = setSize, x = dType)
+    
+    #creating the correct answer
+    correct <- intersect(sourceSets[[1]], sourceSets[[2]])
+    if(length(correct) > 0){
+      correct <- correct #format for output
+    } else {
+      correct <- "\\$\\emptyset\\$"
+    }
   }
   
   if (difficulty > 1) {
@@ -250,24 +250,24 @@ getSetIntersectMC <- function(numSets=2, setSize=9, dType = 1, difficulty =1 ) {
     currentDist[[1]] <- wrong
     currentDist <- formatListAsSet(currentDist[[1]])
     distractors[i] <- currentDist
-  
+    
     #Note the single brackets '[1]' here 
     distractors[i] <- currentDist
   }
   correct <- formatListAsSet(correct)
   if (difficulty < 3) {
-  #Iterate through the sourceSets. format list as Set and insert at the index.
-  counter <- 1
-  for (s in sourceSets){
-    sourceSets[counter] <- formatListAsSet(s)
-    counter <- counter + 1
-  }
+    #Iterate through the sourceSets. format list as Set and insert at the index.
+    counter <- 1
+    for (s in sourceSets){
+      sourceSets[counter] <- formatListAsSet(s)
+      counter <- counter + 1
+    }
   }
   if (difficulty == 1) {
-  #format the the sourceSets as Question Strings
-  # "A = {...}"
-  # "B = {...}"
-  sourceSets <- insertSetQStrings(sourceSets)
+    #format the the sourceSets as Question Strings
+    # "A = {...}"
+    # "B = {...}"
+    sourceSets <- insertSetQStrings(sourceSets)
   }
   if (difficulty > 1) {
     #format the the sourceSets as Question Strings
@@ -285,6 +285,7 @@ getSetIntersectMC <- function(numSets=2, setSize=9, dType = 1, difficulty =1 ) {
   
   return(toSend)
 }
+
 
 
 
